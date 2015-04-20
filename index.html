@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<head>
+	<title>Bookmarklet</title>
+</head>
+<body>
+<a href="javascript:(function() {
+    var i, 
+        root = document.body,
+        node = root.firstChild,
+        word, 
+        wordMap = {},
+        wordArr = [], 
+        wordCloudFrame, 
+        fontSize, 
+        htmlStr, 
+        i,
+        nonWords = new RegExp('[^a-zA-Z]*', 'gi');
+
+    while (node != null && node != root) {
+
+        if (node.nodeType == document.TEXT_NODE) {
+           var val = node.nodeValue ? node.nodeValue : node.innerText;   
+            wordList = val.split(' ');
+
+            for (i = 0; i < wordList.length; i++) {
+
+                word = wordList[i].replace(nonWords, ''); 
+
+                if (word && word.length > 3) {
+                    word = word.toLowerCase();
+                    if (wordMap[word]) {
+                        wordMap[word]++;
+                    } else {
+                        wordArr.push(word);
+                        wordMap[word] = 1;
+                    }
+
+                }
+
+            }
+        }
+  
+  		if (node.hasChildNodes()) { /* depth-first search */
+            node = node.firstChild;
+        } else { /* walk back up the tree */
+            while(node.nextSibling == null && node != root) {
+                node = node.parentNode;
+            }
+            node = node.nextSibling;
+        }
+
+
+        
+ 
+
+    }
+
+
+    wordArr.sort();
+
+
+   wordCloudFrame = document.getElementById('tag-cloud');
+    
+    if (!wordCloudFrame) {
+        wordCloudFrame = document.createElement('iframe');
+        wordCloudFrame.width = '350px';
+        wordCloudFrame.height = '90%';
+        wordCloudFrame.id = 'tag-cloud';
+        wordCloudFrame.style.position = 'absolute';
+        wordCloudFrame.style.border = '1px solid #444';
+        wordCloudFrame.style.top = '80px';
+        wordCloudFrame.style.right = '80px';
+        wordCloudFrame.style.backgroundColor = '#ffffff';
+    }
+    
+    document.body.appendChild(wordCloudFrame);    
+    
+    
+    htmlStr = '<!doctype html><html><body>';
+    
+    htmlStr += '<div style=\'padding:5px\'>'; 
+        
+    for ( i = 0; i < wordArr.length; i++) {
+        word = wordArr[i];
+        fontSize = (95 + ( 10 * wordMap[word])); /* increase font-size by about 10 percent per occurence */
+        htmlStr += '<span style=\'color: #1111ee; font-size:' + fontSize + '%;\'>' + word + '</span> ';
+        
+    }   
+    
+    htmlStr += '</div></body></html>';
+    setTimeout(function() {
+        wordCloudFrame.contentDocument.body.innerHTML = htmlStr;
+    });
+
+}());">Get a Word Cloud For This Website!</a>
+
+<script>
+
+</script>
+</body>
+</html>
